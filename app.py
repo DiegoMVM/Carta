@@ -1,68 +1,122 @@
 from flask import Flask, render_template, request, jsonify
-from pathlib import Path
+from supabase import create_client, Client
 from datetime import datetime
-import json
+import os
 import base64
-import re
+import binascii
 
 app = Flask(__name__)
 
-BASE_DIR = Path(__file__).resolve().parent
-DATA_DIR = BASE_DIR / "data"
-DRAWINGS_DIR = BASE_DIR / "static" / "drawings"
-LETTERS_FILE = DATA_DIR / "cartas.json"
 
-DATA_DIR.mkdir(exist_ok=True)
-DRAWINGS_DIR.mkdir(parents=True, exist_ok=True)
+# =========================================================
+# SUPABASE
+# =========================================================
 
-def load_letters():
-    if not LETTERS_FILE.exists():
-        return []
-    try:
-        return json.loads(LETTERS_FILE.read_text(encoding="utf-8"))
-    except (json.JSONDecodeError, OSError):
-        return []
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 
-def save_letters(letters):
-    LETTERS_FILE.write_text(
-        json.dumps(letters, ensure_ascii=False, indent=2),
-        encoding="utf-8"
+if not SUPABASE_URL or not SUPABASE_KEY:
+    raise RuntimeError(
+        "Faltan las variables de entorno SUPABASE_URL y SUPABASE_KEY."
     )
 
-def next_id(letters):
-    if not letters:
-        return 1
-    return max(letter["id"] for letter in letters) + 1
+supabase: Client = create_client(
+    SUPABASE_URL,
+    SUPABASE_KEY
+)
+
+BUCKET_NAME = "dibujos"
+
+
+# =========================================================
+# PÁGINA PRINCIPAL
+# =========================================================
 
 @app.route("/")
 def index():
     return render_template("index.html")
 
+
+# =========================================================
+# OBTENER TODAS LAS CARTAS
+# =========================================================
+
 @app.get("/api/cartas")
 def get_letters():
-    letters = load_letters()
-    return jsonify([
-        {
-            "id": letter["id"],
-            "nombre": f"Carta Nº{letter['id']}",
-            "de": letter["de"],
-            "para": letter["para"]
-        }
-        for letter in letters
-    ])
+
+    try:
+        response = (
+            supabase
+            .table("cartas")
+            .select("id, de, para")
+            .order("id", desc=False)
+            .execute()
+        )
+
+        letters = response.data or []
+
+        return jsonify([
+            {
+                "id": letter["id"],
+                "nombre": f"Carta Nº{letter['id']}",
+                "de": letter["de"],
+                "para": letter["para"]
+            }
+            for letter in letters
+        ])
+
+    except Exception as error:
+
+        print("ERROR AL OBTENER CARTAS:", error)
+
+        return jsonify({
+            "error": "No se pudieron cargar las cartas."
+        }), 500
+
+
+# =========================================================
+# OBTENER UNA CARTA
+# =========================================================
 
 @app.get("/api/cartas/<int:letter_id>")
 def get_letter(letter_id):
-    letters = load_letters()
-    letter = next((x for x in letters if x["id"] == letter_id), None)
 
-    if letter is None:
-        return jsonify({"error": "Carta no encontrada"}), 404
+    try:
 
-    return jsonify(letter)
+        response = (
+            supabase
+            .table("cartas")
+            .select("*")
+            .eq("id", letter_id)
+            .single()
+            .execute()
+        )
+
+        letter = response.data
+
+        if not letter:
+            return jsonify({
+                "error": "Carta no encontrada"
+            }), 404
+
+        return jsonify(letter)
+
+    except Exception as error:
+
+        print("ERROR AL OBTENER CARTA:", error)
+
+        return jsonify({
+            "error": "Carta no encontrada"
+        }), 404
+
+
+# =========================================================
+# CREAR UNA CARTA
+# =========================================================
 
 @app.post("/api/cartas")
 def create_letter():
+
     payload = request.get_json(silent=True) or {}
 
     de = str(payload.get("de", "")).strip()
@@ -70,62 +124,175 @@ def create_letter():
     carta = str(payload.get("carta", "")).strip()
     dibujo = payload.get("dibujo", "")
 
+
+    # -----------------------------------------------------
+    # VALIDAR DATOS
+    # -----------------------------------------------------
+
     if not de or not para or not carta:
+
         return jsonify({
             "error": "Los campos De, Para y Escriba carta son obligatorios."
         }), 400
 
-    if not isinstance(dibujo, str) or not dibujo.startswith("data:image/png;base64,"):
-        return jsonify({"error": "El dibujo no es válido."}), 400
 
-    # Formato solicitado para el archivo de texto.
+    if (
+        not isinstance(dibujo, str)
+        or not dibujo.startswith("data:image/png;base64,")
+    ):
+
+        return jsonify({
+            "error": "El dibujo no es válido."
+        }), 400
+
+
+    # -----------------------------------------------------
+    # PREPARAR TEXTO
+    # -----------------------------------------------------
+
     texto = f"De: {de}\nPara: {para}\n{carta}"
 
-    letters = load_letters()
-    letter_id = next_id(letters)
-
-    texto_filename = f"texto_{letter_id:07d}.txt"
-    imagen_filename = f"imagen_{letter_id:07d}.png"
-
-    # Se guardan dentro de una carpeta propia para cada carta.
-    letter_dir = DATA_DIR / f"Carta_{letter_id:07d}"
-    letter_dir.mkdir(exist_ok=True)
-
-    (letter_dir / texto_filename).write_text(texto, encoding="utf-8")
 
     try:
+
+        # -------------------------------------------------
+        # OBTENER SIGUIENTE ID
+        # -------------------------------------------------
+
+        response = (
+            supabase
+            .table("cartas")
+            .select("id")
+            .order("id", desc=True)
+            .limit(1)
+            .execute()
+        )
+
+        existing_letters = response.data or []
+
+        if existing_letters:
+            letter_id = int(existing_letters[0]["id"]) + 1
+        else:
+            letter_id = 1
+
+
+        # -------------------------------------------------
+        # CONVERTIR BASE64 A PNG
+        # -------------------------------------------------
+
         image_data = dibujo.split(",", 1)[1]
-        image_bytes = base64.b64decode(image_data)
-    except (IndexError, ValueError, base64.binascii.Error):
-        return jsonify({"error": "No se pudo guardar el dibujo."}), 400
 
-    drawing_path = DRAWINGS_DIR / imagen_filename
-    drawing_path.write_bytes(image_bytes)
+        image_bytes = base64.b64decode(
+            image_data,
+            validate=True
+        )
 
-    letter = {
-        "id": letter_id,
-        "de": de,
-        "para": para,
-        "carta": carta,
-        "texto": texto,
-        "texto_filename": texto_filename,
-        "imagen_filename": imagen_filename,
-        "imagen_url": f"/static/drawings/{imagen_filename}",
-        "creada": datetime.now().isoformat(timespec="seconds")
-    }
 
-    letters.append(letter)
-    save_letters(letters)
+        # -------------------------------------------------
+        # NOMBRE DE LA IMAGEN
+        # -------------------------------------------------
 
-    return jsonify({
-        "ok": True,
-        "id": letter_id,
-        "nombre": f"Carta Nº{letter_id}"
-    }), 201
+        imagen_filename = f"imagen_{letter_id:07d}.png"
+
+
+        # -------------------------------------------------
+        # SUBIR IMAGEN A SUPABASE STORAGE
+        # -------------------------------------------------
+
+        supabase.storage \
+            .from_(BUCKET_NAME) \
+            .upload(
+                imagen_filename,
+                image_bytes,
+                {
+                    "content-type": "image/png",
+                    "upsert": "false"
+                }
+            )
+
+
+        # -------------------------------------------------
+        # OBTENER URL PÚBLICA
+        # -------------------------------------------------
+
+        image_url_response = (
+            supabase
+            .storage
+            .from_(BUCKET_NAME)
+            .get_public_url(imagen_filename)
+        )
+
+        imagen_url = image_url_response
+
+
+        # -------------------------------------------------
+        # GUARDAR CARTA EN LA BASE DE DATOS
+        # -------------------------------------------------
+
+        letter = {
+            "id": letter_id,
+            "de": de,
+            "para": para,
+            "carta": carta,
+            "texto": texto,
+            "imagen_url": imagen_url,
+            "creada": datetime.now().isoformat()
+        }
+
+
+        supabase \
+            .table("cartas") \
+            .insert(letter) \
+            .execute()
+
+
+        # -------------------------------------------------
+        # RESPUESTA
+        # -------------------------------------------------
+
+        return jsonify({
+            "ok": True,
+            "id": letter_id,
+            "nombre": f"Carta Nº{letter_id}"
+        }), 201
+
+
+    except (ValueError, binascii.Error):
+
+        return jsonify({
+            "error": "No se pudo procesar el dibujo."
+        }), 400
+
+
+    except Exception as error:
+
+        print("ERROR AL CREAR CARTA:", error)
+
+        return jsonify({
+            "error": "No se pudo guardar la carta."
+        }), 500
+
+
+# =========================================================
+# HEALTH CHECK
+# =========================================================
 
 @app.get("/health")
 def health():
-    return {"status": "ok"}
+
+    return {
+        "status": "ok"
+    }
+
+
+# =========================================================
+# EJECUTAR
+# =========================================================
 
 if __name__ == "__main__":
-    app.run(debug=True)
+
+    app.run(
+        host="0.0.0.0",
+        port=int(os.environ.get("PORT", 5000)),
+        debug=False
+    )
