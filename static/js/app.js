@@ -1,5 +1,6 @@
 const tabCartas = document.getElementById("tab-cartas");
 const tabEscribir = document.getElementById("tab-escribir");
+cargarListaCartas(); 
 
 const vistaEscribir = document.getElementById("vista-escribir");
 const vistaCartas = document.getElementById("vista-cartas");
@@ -242,3 +243,4 @@ async function mostrarCarta(id) {
 ctx.lineWidth = 3;
 ctx.lineCap = "round";
 ctx.lineJoin = "round";
+cargarListaCartas(); 
