@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+
+# Archivos generados durante el uso de la aplicación
+data/Carta_*/
+static/drawings/*.png
+
+# Mantener el archivo índice de datos
+!data/cartas.json
