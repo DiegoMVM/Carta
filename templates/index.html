@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cartas</title>
+
+    <!-- Hoja de estilos: actualmente vacía, preparada para el futuro -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+    <main>
+        <h1>Cartitas de amor 🩷</h1>
+
+        <!-- =========================================
+             PESTAÑAS
+             ========================================= -->
+        <nav>
+            <button type="button" id="tab-escribir">Escribir nueva carta</button>
+            <button type="button" id="tab-cartas">Cartitas enviadas</button>
+        </nav>
+
+        <!-- =========================================
+             PESTAÑA 1: ESCRIBIR CARTA
+             ========================================= -->
+        <section id="vista-escribir">
+            <h2>Escriba su carta</h2>
+
+            <form id="form-carta">
+
+                <label for="de"></label>
+                <input
+                    type="text"
+                    id="de"
+                    name="de"
+                    placeholder="De:"
+                    required
+                >
+
+                <label for="para"></label>
+                <input
+                    type="text"
+                    id="para"
+                    name="para"
+                    placeholder="Para:"
+                    required
+                >
+
+                <label for="carta"></label>
+                <textarea
+                    id="carta"
+                    name="carta"
+                    placeholder="Escriba el mensaje para su amorcito"
+                    rows="12"
+                    required
+                ></textarea>
+
+                <label for="canvas">Envíe un dibujillo ric:</label>
+
+                <canvas
+                    id="canvas"
+                    width="800"
+                    height="400"
+                    aria-label="Área para dibujar"
+                ></canvas>
+
+                <div>
+                    <button type="button" id="limpiar-dibujo">
+                        Borrar dibujo
+                    </button>
+
+                    <button type="submit" id="enviar-carta">
+                        Enviar carta
+                    </button>
+                </div>
+
+            </form>
+
+            <p id="mensaje"></p>
+        </section>
+
+        <!-- =========================================
+             PESTAÑA 2: CARTAS GENERADAS
+             ========================================= -->
+        <section id="vista-cartas" hidden>
+            <h2>Cartas enviadas</h2>
+
+            <div id="lista-cartas">
+                <!-- JavaScript insertará aquí Carta_001, Carta_002... -->
+            </div>
+
+            <article id="detalle-carta" hidden>
+                <h3 id="detalle-titulo"></h3>
+
+                <p id="detalle-texto"></p>
+
+                <img
+                    id="detalle-imagen"
+                    src=""
+                    alt="Dibujo de la carta"
+                >
+            </article>
+        </section>
+
+    </main>
+
+    <!-- JavaScript separado para mantener el HTML organizado -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+
+</body>
+</html>
