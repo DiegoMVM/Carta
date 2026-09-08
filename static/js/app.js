@@ -1,5 +1,5 @@
-const tabEscribir = document.getElementById("tab-escribir");
 const tabCartas = document.getElementById("tab-cartas");
+const tabEscribir = document.getElementById("tab-escribir");
 
 const vistaEscribir = document.getElementById("vista-escribir");
 const vistaCartas = document.getElementById("vista-cartas");
@@ -24,16 +24,18 @@ let dibujando = false;
 // PESTAÑAS
 // =========================================
 
-tabEscribir.addEventListener("click", () => {
-    vistaEscribir.hidden = false;
-    vistaCartas.hidden = true;
-});
-
 tabCartas.addEventListener("click", () => {
     vistaEscribir.hidden = true;
     vistaCartas.hidden = false;
     cargarListaCartas();
 });
+
+tabEscribir.addEventListener("click", () => {
+    vistaEscribir.hidden = false;
+    vistaCartas.hidden = true;
+});
+
+
 
 
 // =========================================
