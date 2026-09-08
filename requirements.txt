@@ -1,2 +1,5 @@
 Flask>=3.0,<4.0
 gunicorn>=22.0,<24.0
+supabase==2.31.0
+supabase-auth==2.31.0
+supabase-functions==2.31.0
