@@ -1,0 +1,577 @@
+
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=IM+Fell+English:ital@0;1&family=Quicksand:wght@400;500;600;700&display=swap');
+
+:root {
+    --rosa-fondo: #fff7f8;
+    --rosa-claro: #fde8ed;
+    --rosa: #e8a8b8;
+    --rosa-oscuro: #b9687d;
+    --vino: #7f4052;
+    --crema: #fffdf9;
+    --lavanda: #eee9f7;
+    --texto: #5f4a50;
+    --borde: #efd3da;
+    --sombra: rgba(151, 91, 108, 0.14);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    min-height: 100%;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    background:
+        radial-gradient(
+            circle at 10% 10%,
+            rgba(255, 218, 228, 0.55),
+            transparent 28%
+        ),
+        radial-gradient(
+            circle at 90% 85%,
+            rgba(226, 216, 243, 0.5),
+            transparent 30%
+        ),
+        var(--rosa-fondo);
+    color: var(--texto);
+    font-family: "Quicksand", sans-serif;
+}
+
+/* Detalles decorativos */
+
+body::before,
+body::after {
+    position: fixed;
+    z-index: -1;
+    font-family: "Cormorant Garamond", serif;
+    color: rgba(185, 104, 125, 0.13);
+    pointer-events: none;
+}
+
+body::before {
+    content: "♡";
+    top: 4vh;
+    left: 4vw;
+    font-size: 8rem;
+    transform: rotate(-15deg);
+}
+
+body::after {
+    content: "♡";
+    right: 5vw;
+    bottom: 3vh;
+    font-size: 10rem;
+    transform: rotate(12deg);
+}
+
+main {
+    width: min(920px, calc(100% - 32px));
+    margin: 45px auto;
+}
+
+
+/* =========================================================
+   ENCABEZADO
+   ========================================================= */
+
+h1 {
+    margin: 0;
+    text-align: center;
+    color: var(--vino);
+    font-family: "Cormorant Garamond", serif;
+    font-size: clamp(3rem, 7vw, 5rem);
+    font-weight: 600;
+    letter-spacing: 1px;
+    line-height: 0.95;
+}
+
+h1::after {
+    content: "♡";
+    display: block;
+    margin-top: 8px;
+    color: var(--rosa);
+    font-size: 1.4rem;
+}
+
+h2 {
+    margin-top: 0;
+    color: var(--vino);
+    font-family: "Cormorant Garamond", serif;
+    font-size: 2rem;
+    font-weight: 600;
+}
+
+
+/* =========================================================
+   PESTAÑAS
+   ========================================================= */
+
+nav {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 35px auto 25px;
+}
+
+nav button {
+    padding: 12px 25px;
+    border: 1px solid var(--borde);
+    border-radius: 30px;
+    background: rgba(255, 253, 249, 0.8);
+    color: var(--vino);
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+
+    transition:
+        transform 0.2s ease,
+        background 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+nav button:hover {
+    transform: translateY(-2px);
+    background: var(--rosa-claro);
+    box-shadow: 0 7px 18px var(--sombra);
+}
+
+nav button:active {
+    transform: translateY(0);
+}
+
+
+/* =========================================================
+   CONTENEDOR PRINCIPAL
+   ========================================================= */
+
+section {
+    padding: 35px;
+    border: 1px solid rgba(239, 211, 218, 0.9);
+    border-radius: 24px;
+    background: rgba(255, 253, 249, 0.88);
+    box-shadow: 0 15px 40px var(--sombra);
+    backdrop-filter: blur(6px);
+}
+
+
+/* =========================================================
+   FORMULARIO
+   ========================================================= */
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+label {
+    margin-top: 12px;
+    color: var(--vino);
+    font-family: "Cormorant Garamond", serif;
+    font-size: 1.35rem;
+    font-weight: 600;
+}
+
+input,
+textarea {
+    width: 100%;
+    border: 1px solid var(--borde);
+    border-radius: 13px;
+    outline: none;
+    background: #fffafb;
+    color: var(--texto);
+    font-family: inherit;
+    font-size: 1rem;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
+}
+
+input {
+    padding: 13px 15px;
+}
+
+textarea {
+    min-height: 220px;
+    padding: 15px;
+    resize: vertical;
+    line-height: 1.6;
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: #c7aab2;
+}
+
+input:focus,
+textarea:focus {
+    border-color: var(--rosa);
+    background: white;
+    box-shadow: 0 0 0 4px rgba(232, 168, 184, 0.15);
+}
+
+
+/* =========================================================
+   ÁREA DE DIBUJO
+   ========================================================= */
+
+canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+    min-height: 250px;
+    margin-top: 3px;
+
+    border: 2px dashed #e5b9c5;
+    border-radius: 17px;
+
+    background: white;
+
+    cursor: crosshair;
+
+    touch-action: none;
+}
+
+
+/* =========================================================
+   BOTONES
+   ========================================================= */
+
+form > div {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 18px;
+}
+
+#limpiar-dibujo,
+#enviar-carta {
+    border: none;
+    border-radius: 25px;
+    padding: 12px 22px;
+
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        opacity 0.2s ease;
+}
+
+#limpiar-dibujo {
+    background: var(--lavanda);
+    color: #6b5c7c;
+}
+
+#enviar-carta {
+    background: var(--rosa);
+    color: #6b5c7c;
+    box-shadow: 0 6px 15px rgba(185, 104, 125, 0.22);
+}
+
+#limpiar-dibujo:hover,
+#enviar-carta:hover {
+    transform: translateY(-2px);
+}
+
+#enviar-carta:hover {
+    box-shadow: 0 9px 20px rgba(185, 104, 125, 0.28);
+}
+
+#limpiar-dibujo:active,
+#enviar-carta:active {
+    transform: translateY(0);
+}
+
+
+/* =========================================================
+   MENSAJES
+   ========================================================= */
+
+#mensaje {
+    min-height: 24px;
+    margin: 18px 0 0;
+
+    text-align: center;
+    color: var(--rosa-oscuro);
+    font-weight: 600;
+}
+
+
+/* =========================================================
+   LISTA DE CARTAS
+   ========================================================= */
+
+#lista-cartas {
+    display: grid;
+    grid-template-columns: repeat(
+        auto-fill,
+        minmax(170px, 1fr)
+    );
+
+    gap: 13px;
+    margin-bottom: 30px;
+}
+
+#lista-cartas button {
+    position: relative;
+
+    padding: 18px 15px;
+
+    border: 1px solid var(--borde);
+    border-radius: 16px;
+
+    background: #fff8fa;
+    color: var(--vino);
+
+    font-family: "Cormorant Garamond", serif;
+    font-size: 1.25rem;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.2s ease,
+        background 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+#lista-cartas button::before {
+    content: "♡";
+    display: block;
+    margin-bottom: 3px;
+
+    color: var(--rosa);
+
+    font-family: serif;
+    font-size: 1.2rem;
+}
+
+#lista-cartas button:hover {
+    transform: translateY(-3px) rotate(-1deg);
+    background: var(--rosa-claro);
+    box-shadow: 0 8px 20px var(--sombra);
+}
+
+
+/* =========================================================
+   CARTA ABIERTA
+   ========================================================= */
+
+/* =========================================================
+   CARTA ABIERTA — ESTILO CARTA ANTIGUA
+   ========================================================= */
+
+#detalle-carta {
+    position: relative;
+    overflow: hidden;
+
+    padding: 50px 55px;
+
+    border: 1px solid #d8c09f;
+    border-radius: 4px;
+
+    /* Papel envejecido */
+    background:
+        radial-gradient(
+            ellipse at 15% 10%,
+            rgba(151, 112, 65, 0.10),
+            transparent 35%
+        ),
+        radial-gradient(
+            ellipse at 90% 90%,
+            rgba(151, 112, 65, 0.12),
+            transparent 35%
+        ),
+        repeating-linear-gradient(
+            0deg,
+            rgba(120, 90, 50, 0.025) 0px,
+            rgba(120, 90, 50, 0.025) 1px,
+            transparent 1px,
+            transparent 31px
+        ),
+        #f7efd9;
+
+    box-shadow:
+        0 3px 5px rgba(80, 55, 35, 0.10),
+        0 15px 35px rgba(80, 55, 35, 0.16),
+        inset 0 0 45px rgba(130, 90, 45, 0.08);
+
+    transform: rotate(-0.15deg);
+}
+
+
+/* =========================================================
+   DECORACIÓN DE LAS ESQUINAS
+   ========================================================= */
+
+#detalle-carta::before,
+#detalle-carta::after {
+    position: absolute;
+
+    color: rgba(126, 84, 60, 0.25);
+
+    font-family: "Cormorant Garamond", serif;
+
+    pointer-events: none;
+}
+
+#detalle-carta::before {
+    content: "❦";
+
+    top: 15px;
+    left: 22px;
+
+    font-size: 2rem;
+}
+
+#detalle-carta::after {
+    content: "❦";
+
+    right: 22px;
+    bottom: 12px;
+
+    font-size: 2rem;
+
+    transform: rotate(180deg);
+}
+
+
+/* =========================================================
+   TÍTULO DE LA CARTA
+   ========================================================= */
+
+#detalle-titulo {
+    margin: 0;
+
+    text-align: center;
+
+    color: #704d42;
+
+    font-family: "IM Fell English", "Cormorant Garamond", serif;
+
+    font-size: 2.4rem;
+    font-weight: 400;
+
+    letter-spacing: 0.5px;
+}
+
+#detalle-titulo::after {
+    content: "❦";
+
+    display: block;
+
+    margin-top: 8px;
+
+    color: #a9796d;
+
+    font-family: serif;
+    font-size: 1.4rem;
+}
+
+
+/* =========================================================
+   TEXTO DE LA CARTA
+   ========================================================= */
+
+#detalle-texto {
+    position: relative;
+
+    margin-top: 30px;
+
+    white-space: pre-wrap;
+
+    color: #4f403b;
+
+    font-family:
+        "IM Fell English",
+        "Cormorant Garamond",
+        serif;
+
+    font-size: 1.35rem;
+
+    line-height: 1.9;
+
+    letter-spacing: 0.1px;
+
+    text-align: left;
+}
+
+
+/* =========================================================
+   DIBUJO DENTRO DE LA CARTA
+   ========================================================= */
+
+#detalle-imagen {
+    display: block;
+
+    width: 100%;
+    max-width: 800px;
+    height: auto;
+
+    margin: 35px auto 5px;
+
+    border-radius: 3px;
+
+    padding: 5px;
+}
+
+
+/* =========================================================
+   RESPONSIVE — CELULAR
+   ========================================================= */
+
+@media (max-width: 650px) {
+
+    main {
+        width: min(100% - 18px, 920px);
+        margin: 22px auto;
+    }
+
+    section {
+        padding: 22px 17px;
+        border-radius: 19px;
+    }
+
+    nav {
+        margin-top: 25px;
+    }
+
+    nav button {
+        flex: 1;
+        padding: 11px 10px;
+    }
+
+    form > div {
+        flex-direction: column;
+    }
+
+    #limpiar-dibujo,
+    #enviar-carta {
+        width: 100%;
+    }
+
+    canvas {
+        min-height: 220px;
+    }
+
+    #detalle-carta {
+        padding: 25px 20px;
+    }
+
+    #detalle-texto {
+        font-size: 1.2rem;
+    }
+}
